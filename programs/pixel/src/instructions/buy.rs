@@ -13,7 +13,11 @@ pub struct Buy<'info> {
   #[account(mut)]
   pub user: Signer<'info>,
 
+  #[account(
+    mint::token_program = token_program,
+  )]
   pub token_mint: Box<InterfaceAccount<'info, Mint>>,
+
   #[account(
     seeds = [ CONFIG_SEED ],
     bump = config.bump,
@@ -115,15 +119,18 @@ impl Buy<'_> {
     ctx.accounts.bonding_curve.real_token_reserves -= min_amount;
     ctx.accounts.bonding_curve.virtual_sol_reserves += sol_amount;
     ctx.accounts.bonding_curve.virtual_token_reserves -= min_amount;
+    let mut is_completed = false;
     if ctx.accounts.bonding_curve.real_token_reserves == 0 {
       ctx.accounts.bonding_curve.complete = true;
+      is_completed = true;
     }
 
     emit!(BuyEvent {
         mint: ctx.accounts.token_mint.key(),
         token_output: min_amount,
         sol_input: sol_amount,
-        buyer: ctx.accounts.user.key()
+        buyer: ctx.accounts.user.key(),
+        is_completed,
     });
     Ok(())
   }

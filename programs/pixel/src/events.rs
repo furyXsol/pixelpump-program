@@ -15,6 +15,7 @@ pub struct BuyEvent {
   pub buyer: Pubkey,
   pub sol_input: u64,
   pub token_output: u64,
+  pub is_completed: bool,
 }
 
 #[event]

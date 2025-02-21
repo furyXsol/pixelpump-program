@@ -5,7 +5,7 @@ seeds = false
 skip-lint = false
 
 [programs.localnet]
-pixel = "2K3pM9K2D3JYGWKVRFBGSDWLez299NFQXSWVDJ6YpsdD"
+pixel = "8GTANRAJSDKSWShY8tqf2s98fSeQYqvppAH3eDx7hQ4B"
 
 [registry]
 url = "https://api.apr.dev"

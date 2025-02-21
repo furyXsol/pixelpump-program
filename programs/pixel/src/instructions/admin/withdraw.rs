@@ -14,14 +14,12 @@ pub struct Withdraw<'info> {
   pub authority: Signer<'info>,
 
   #[account(
-    mut,
     mint::token_program = token_program,
   )]
   pub token_mint: Box<InterfaceAccount<'info, Mint>>,
 
   /// CHECK
   #[account(
-    mut,
     seeds=[
       CONFIG_SEED
     ],
@@ -49,9 +47,11 @@ pub struct Withdraw<'info> {
   pub associted_bonding_curve: Box<InterfaceAccount<'info, TokenAccount>>,
 
   #[account(
+    init_if_needed,
     associated_token::mint = token_mint,
     associated_token::authority = authority,
     token::token_program = token_program,
+    payer = authority,
   )]
   pub associted_admin_token_account: Box<InterfaceAccount<'info, TokenAccount>>,
 
