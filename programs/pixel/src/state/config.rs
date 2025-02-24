@@ -11,6 +11,9 @@ pub struct Config {
     pub initial_virtual_sol_reserves: u64,
     pub initial_real_token_reserves: u64,
     pub token_total_supply: u64,
-    pub fee_base_points: u64, // 100 is 1%
+    pub fee_base_points: u16, // 100 is 1%
+    pub fee_stakeholders: u16, // 100 is 1%
+    pub epoch_duration: u32, // ONE_WEEK
     pub bump: u8,
+    pub stake_token: Pubkey,
 }

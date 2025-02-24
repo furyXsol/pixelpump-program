@@ -27,6 +27,18 @@ pub struct SellEvent {
 }
 
 #[event]
+pub struct StakeEvent {
+  pub staker: Pubkey,
+  pub amount: u64,
+}
+
+#[event]
+pub struct UnstakeEvent {
+  pub staker: Pubkey,
+  pub amount: u64,
+}
+
+#[event]
 pub struct WithdrawEvent {
   pub mint: Pubkey,
   pub withdrawer: Pubkey,

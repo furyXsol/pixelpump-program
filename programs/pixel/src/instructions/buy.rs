@@ -31,6 +31,17 @@ pub struct Buy<'info> {
   )]
   pub fee_recipient: UncheckedAccount<'info>,
 
+  /// CHECK
+  #[account(
+    mut,
+    seeds = [
+      STAKE_HOLDER_SEED,
+      config.stake_token.key().as_ref(),
+    ],
+    bump = stake_holder.bump,
+  )]
+  pub stake_holder: Box<Account<'info, StakeHolder>>,
+
   #[account(
     mut,
     seeds = [
@@ -69,22 +80,53 @@ impl Buy<'_> {
 
     let decimals = ctx.accounts.token_mint.decimals;
     let amount = params.amount;
+    require!(amount > 0, PixelError::InvalidParam);
     let real_token_reserves = ctx.accounts.bonding_curve.real_token_reserves;
 
     let min_amount = min(amount, real_token_reserves);
     let virtual_sol_reserves = ctx.accounts.bonding_curve.virtual_sol_reserves;
     let virtual_token_reserves = ctx.accounts.bonding_curve.virtual_token_reserves;
+    require!(virtual_token_reserves > min_amount, PixelError::NotEnoughAmount);
     let sol_amount = ((min_amount as u128) * (virtual_sol_reserves as u128) / ((virtual_token_reserves as u128)- (min_amount as u128)) + 1_u128) as u64;
-    let fee_sol_amount = sol_amount * ctx.accounts.config.fee_base_points / 10000;
+    let fee_sol_amount = sol_amount * (ctx.accounts.config.fee_base_points as u64) / 10000;
+
+    //
+    let fee_staker_amount = fee_sol_amount * (ctx.accounts.config.fee_stakeholders as u64) /10000;
+    let fee_recipient_amount = fee_sol_amount - fee_staker_amount;
 
     require!(sol_amount <= params.max_sol_cost, PixelError::SlippageExceed);
 
     //transfer sol to fee_receipient
-    transfer_sol(
+    if fee_recipient_amount > 0 {
+      transfer_sol(
+          ctx.accounts.user.to_account_info(),
+          ctx.accounts.fee_recipient.to_account_info(),
+          fee_recipient_amount,
+      )?;
+    }
+    // transfer sol to stake_holder
+    if fee_staker_amount > 0 {
+      transfer_sol(
         ctx.accounts.user.to_account_info(),
-        ctx.accounts.fee_recipient.to_account_info(),
-        fee_sol_amount,
-    )?;
+        ctx.accounts.stake_holder.to_account_info(),
+        fee_staker_amount,
+      )?;
+      //update stake_holder status
+      let current_time = Clock::get()?.unix_timestamp as u32;
+      let first_epoch_start_time = ctx.accounts.stake_holder.first_epoch_start_time;
+      let epoch_duration = ctx.accounts.config.epoch_duration;
+      let current_epoch = (current_time - first_epoch_start_time / epoch_duration) as u16;
+      if ctx.accounts.stake_holder.rewards.contains_key(&current_epoch) {
+          if let Some(x) = ctx.accounts.stake_holder.rewards.get_mut(&current_epoch) {
+            *x += fee_staker_amount;
+          }
+      } else {
+        ctx.accounts.stake_holder.rewards.insert(
+          current_epoch,
+          fee_staker_amount,
+        );
+      }
+    }
 
     //transfer sol to bonding_curve
     transfer_sol(

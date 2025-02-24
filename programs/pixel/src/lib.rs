@@ -11,7 +11,7 @@ use events::*;
 use errors::*;
 use utils::*;
 
-declare_id!("2K3pM9K2D3JYGWKVRFBGSDWLez299NFQXSWVDJ6YpsdD");
+declare_id!("2A4pYsctJgE2KNSspqipdZbv2sF3Gmyk8Ad2iZs2PtyJ");
 
 #[program]
 pub mod pixel {
@@ -20,6 +20,11 @@ pub mod pixel {
     pub fn create_config(mut ctx: Context<CreateConfig>, params: CreateConfigParams) -> Result<()> {
         CreateConfig::apply(&mut ctx, &params)
     }
+
+    pub fn create_stake_holder(mut ctx: Context<CreateStakeHolder>) -> Result<()> {
+        CreateStakeHolder::apply(&mut ctx)
+    }
+
 
     pub fn update_config(mut ctx: Context<UpdateConfig>, params: UpdateConfigParams) -> Result<()> {
         UpdateConfig::apply(&mut ctx, &params)
@@ -39,10 +44,28 @@ pub mod pixel {
         Sell::apply(&mut ctx, &params)
     }
 
-    //withdraw sol from bonding_curve
+    //withdraw sol and spl-token from bonding_curve
     pub fn withdraw(mut ctx: Context<Withdraw>) -> Result<()>{
         Withdraw::apply(&mut ctx)
     }
 
-}
+    // stake STAKING_TOKEN by staker
+    pub fn stake(mut ctx: Context<Stake>, params: StakeParams) -> Result<()> {
+        Stake::apply(&mut ctx, &params)
+    }
 
+    // unstake STAKING_TOKEN by staker
+    pub fn unstake(mut ctx: Context<Unstake>, params: UnstakeParams) -> Result<()> {
+        Unstake::apply(&mut ctx, &params)
+    }
+
+    // claim rewards(SOL) by staker
+    pub fn claim(mut ctx: Context<Claim>) -> Result<()> {
+        Claim::apply(&mut ctx)
+    }
+
+    // withdraw SOL from stake_holder PDA
+    pub fn withdraw_stake_holder(mut ctx: Context<WithdrawStakeHolder>) -> Result<()> {
+        WithdrawStakeHolder::apply(&mut ctx)
+    }
+}
