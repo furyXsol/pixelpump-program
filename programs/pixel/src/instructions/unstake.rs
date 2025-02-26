@@ -69,6 +69,7 @@ impl Unstake<'_> {
     let unstake_amount = params.amount;
     let current_total_stake_amount = ctx.accounts.stake_holder.curent_total_stake;
     require!(unstake_amount < current_total_stake_amount, PixelError::InvalidParam);
+    require!(unstake_amount <= ctx.accounts.user_stake_info.stake_amount, PixelError::InvalidParam);
 
     let decimals = ctx.accounts.stake_token_mint.decimals;
     // transfer stake token to user ata
@@ -95,8 +96,8 @@ impl Unstake<'_> {
     let current_time = Clock::get()?.unix_timestamp as u32;
     let first_epoch_start_time = ctx.accounts.stake_holder.first_epoch_start_time;
     let epoch_duration = ctx.accounts.config.epoch_duration;
-    let current_epoch = (current_time - first_epoch_start_time / epoch_duration) as u16;
-
+    let current_epoch = ((current_time - first_epoch_start_time) / epoch_duration) as u16;
+    require!(current_epoch < MAX_EPOCH, PixelError::EpochExceed);
     // update total_stake_amount for next epoch.
     if ctx.accounts.stake_holder.total_stakes.contains_key(&(current_epoch + 1)) {
       if let Some(x) = ctx.accounts.stake_holder.total_stakes.get_mut(&(current_epoch + 1)) {
@@ -126,12 +127,12 @@ impl Unstake<'_> {
               let epoch_total_stakes = *ctx.accounts.stake_holder.total_stakes.get(&i).unwrap();
               prev_total_stake_amount = epoch_total_stakes;
               if epoch_total_stakes > 0 {
-                pending_rewards += user_stake_amount * epoch_reward / (epoch_total_stakes as u64);
+                pending_rewards += user_stake_amount.checked_mul(epoch_reward).unwrap().checked_div(epoch_total_stakes as u64).unwrap();
               }
             } else {
               let epoch_total_stakes = prev_total_stake_amount;
               if epoch_total_stakes > 0 {
-                pending_rewards += user_stake_amount * epoch_reward / (epoch_total_stakes as u64);
+                pending_rewards += user_stake_amount.checked_mul(epoch_reward).unwrap().checked_div(epoch_total_stakes as u64).unwrap();
               }
             }
           }

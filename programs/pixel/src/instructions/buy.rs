@@ -115,7 +115,8 @@ impl Buy<'_> {
       let current_time = Clock::get()?.unix_timestamp as u32;
       let first_epoch_start_time = ctx.accounts.stake_holder.first_epoch_start_time;
       let epoch_duration = ctx.accounts.config.epoch_duration;
-      let current_epoch = (current_time - first_epoch_start_time / epoch_duration) as u16;
+      let current_epoch = ((current_time - first_epoch_start_time) / epoch_duration) as u16;
+      require!(current_epoch < MAX_EPOCH, PixelError::EpochExceed);
       if ctx.accounts.stake_holder.rewards.contains_key(&current_epoch) {
           if let Some(x) = ctx.accounts.stake_holder.rewards.get_mut(&current_epoch) {
             *x += fee_staker_amount;

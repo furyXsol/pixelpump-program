@@ -33,7 +33,7 @@ pub struct CreateStakeHolder<'info> {
     ],
     bump,
     payer = payer,
-    space = 8 + 10*300,
+    space = 8 + 1 + 8 + 4 + 1 + 20*300,
   )]
   pub stake_holder: Account<'info, StakeHolder>,
   #[account(

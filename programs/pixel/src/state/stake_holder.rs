@@ -2,6 +2,7 @@ use std::collections::BTreeMap;
 
 use crate::*;
 pub const STAKE_HOLDER_SEED: &[u8] = b"stake_holder";
+pub const MAX_EPOCH:u16 = 300;
 
 #[account]
 #[derive(Debug)]
