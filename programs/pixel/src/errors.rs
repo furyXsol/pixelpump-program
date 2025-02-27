@@ -13,5 +13,9 @@ pub enum PixelError {
   #[msg("Sold All Tokens")]
   SoldAllToken,
   #[msg("Not Enough Tokens")]
-  NotEnoughToken
+  NotEnoughToken,
+  #[msg("Not enough amount")]
+  NotEnoughAmount,
+  #[msg("Epoch Exceed")]
+  EpochExceed,
 }

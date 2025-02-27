@@ -52,7 +52,6 @@ pub fn transfer_token_from_user_to_vault<'info>(
       authority: authority,
     }
   ), amount, decimals)
-
 }
 
 pub fn transfer_token_from_vault_to_user<'info>(

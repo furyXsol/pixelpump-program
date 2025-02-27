@@ -127,9 +127,9 @@ impl CreateToken<'_> {
 
     emit!(CreateTokenEvent {
       creator: ctx.accounts.payer.key(),
-      token_name: String::from_utf8(params.name.to_vec()).unwrap(),
-      token_symbol: String::from_utf8(params.symbol.to_vec()).unwrap(),
-      token_uri: String::from_utf8(params.uri.to_vec()).unwrap(),
+      token_name: String::from_utf8(params.name.to_vec()).expect("Failed to parse utf-8 for token_name"),
+      token_symbol: String::from_utf8(params.symbol.to_vec()).expect("Failed to parse utf-8 for token_symbol"),
+      token_uri: String::from_utf8(params.uri.to_vec()).expect("Failed to parse utf-8 for token_uri"),
       mint: ctx.accounts.token_mint.key()
     });
 
